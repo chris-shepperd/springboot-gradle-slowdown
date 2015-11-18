@@ -1,0 +1,140 @@
+// ---------------------------------------- Build Script Dependencies ----------------------------------------
+buildscript {
+   List springBootPlugin = ["org.springframework.boot:spring-boot-gradle-plugin:1.3.0.RELEASE"]
+
+   repositories {
+	mavenCentral()
+   }
+
+   dependencies {
+      classpath springBootPlugin
+   }
+}
+
+// ---------------------------------------- Property Definitions ----------------------------------------
+
+project.ext {
+   springBootVersion = "1.3.0.RELEASE"
+}
+
+// ---------------------------------------- Dependency Definitions ----------------------------------------
+
+List springBootList = ["org.springframework.boot:spring-boot-loader:${project.springBootVersion}",
+                       "org.springframework.boot:spring-boot-starter-web:${project.springBootVersion}",
+                       "org.springframework.boot:spring-boot-starter-actuator:${project.springBootVersion}"]
+
+// ---------------------------------------- All Project Definitions ----------------------------------------
+
+subprojects {
+   apply plugin: 'java'
+
+   sourceCompatibility = 1.8
+   targetCompatibility = 1.8
+
+   repositories {
+      mavenCentral()
+   }
+
+   dependencies {
+      compile springBootList
+   }
+}
+
+// ---------------------------------------- Engine Project Definitions ----------------------------------------
+
+project(':engines') {
+   subprojects {
+      apply plugin: 'spring-boot'
+
+      springBoot {
+         executable = true
+//         classifier = "boot"
+      }
+
+//      dependencyManagement {
+//         applyMavenExclusions false
+//      }
+   }
+
+   project('avprm-bom') {
+      dependencies {
+         compile project(':components:openapi'), project(':components:common'), project(':components:gson'), project(':components:hep')
+         compile project(':components:rules'), project(':components:client'), project(':components:mongo'), project(':components:camel') 
+         compile project(':components:restmq-camel'), project(':components:restmq-client')
+      }
+   }
+
+   project('avprm-restapi') {
+      dependencies {
+         compile project(':components:openapi'), project(':components:common'), project(':components:gson'), project(':components:hep')
+         compile project(':components:rules'), project(':components:client'), project(':components:mongo') 
+      }
+   }
+}
+
+// ---------------------------------------- Component Project Definitions ----------------------------------------
+
+project(':components') {
+
+   project('common') {
+      dependencies {
+         compile project(':components:openapi')
+      }
+   }
+
+   project('camel') {
+      dependencies {
+         compile project(':components:openapi'), project(':components:common'), project(':components:client')
+      }
+   }
+
+   // todo: to be removed
+   project('gson') {
+      dependencies {
+         compile project(':components:openapi'), project(':components:common')
+      }
+   }
+
+   project('hep') {
+      dependencies {
+         compile project(':components:openapi'), project(':components:common'), project(':components:gson'), project(':components:mongo')
+      }
+   }
+
+   project('jms') {
+      dependencies {
+         compile project(':components:openapi'), project(':components:common'), project(':components:camel')
+      }
+   }
+
+   project('mongo') {
+      dependencies {
+         compile project(':components:openapi'), project(':components:common'), project(':components:gson')
+      }
+   }
+
+   project('rules') {
+      dependencies {
+         compile project(':components:openapi'), project(':components:common'), project(':components:gson'), project(':components:mongo'), project(':components:client')
+      }
+   }
+
+   project('restmq-client') {
+      dependencies {
+         compile project(':components:restmq-openapi'), project(':components:common')
+      }
+   }
+
+   project('restmq-camel') {
+      dependencies {
+         compile project(':components:restmq-client'), project(':components:camel')
+      }
+   }
+
+   project('client') {
+      dependencies {
+         compile project(':components:openapi'), project(':components:common'), project(':components:restmq-client')
+      }
+   }
+}
+
